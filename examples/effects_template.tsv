@@ -1,0 +1,8 @@
+feature	study	stratum	estimate	se
+gene_A	study_1	neuronal	0.42	0.12
+gene_A	study_2	neuronal	0.31	0.10
+gene_A	study_3	neuronal	0.55	0.16
+gene_B	study_1	neuronal	-0.28	0.11
+gene_B	study_2	neuronal	-0.08	0.09
+gene_B	study_3	neuronal	-0.35	0.14
+

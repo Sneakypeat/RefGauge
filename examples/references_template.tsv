@@ -1,0 +1,8 @@
+feature	target	reference	estimate	se
+gene_A	organoid_A	age_matched_primary	0.42	0.12
+gene_A	organoid_A	younger_primary	0.81	0.13
+gene_A	organoid_A	mixed_primary	0.19	0.11
+gene_B	organoid_A	age_matched_primary	-0.28	0.11
+gene_B	organoid_A	younger_primary	0.06	0.10
+gene_B	organoid_A	mixed_primary	-0.61	0.14
+
