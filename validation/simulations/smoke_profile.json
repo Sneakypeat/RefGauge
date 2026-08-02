@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "profile": "smoke",
+  "description": "Fast execution check spanning the principal simulation axes; not inferential",
+  "full_grid_cell_indices": [
+    2,
+    201,
+    373,
+    559,
+    725
+  ],
+  "default_replicates": 4,
+  "default_nnf_draws": 250
+}

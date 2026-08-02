@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "profile": "nominal_selection_alias_resolution",
+  "description": "Post-audit targeted grid resolving the L27 alias between the fully nominal target condition and k=6; target bias is fixed at zero, target scale at one, and selection is training-only",
+  "master_seed": 20260802,
+  "alpha": 0.05,
+  "full_replicates_by_p": {
+    "1000": 1000
+  },
+  "full_profile_note": "This is a post-audit alias-resolution diagnostic, not a replacement for the frozen 378-cell stress grid",
+  "default_nnf_draws": 25000,
+  "default_pi_features": 12,
+  "selection_fraction": 0.2,
+  "minimum_training_studies": 5,
+  "block_size": 50,
+  "design": {
+    "type": "cartesian_fixed_target",
+    "fixed": {
+      "p": 1000,
+      "target_bias": 0.0,
+      "target_scale": 1.0,
+      "selection": "training_only"
+    },
+    "axes": {
+      "k": [6, 15, 30],
+      "truth": ["null", "sparse_10pct", "dense_70pct"],
+      "block_rho": [0.0, 0.3, 0.7],
+      "missingness": ["mcar_0", "mcar_50", "effect_50"]
+    }
+  },
+  "missingness_levels": [
+    {"label": "mcar_0", "mechanism": "mcar", "rate": 0.0},
+    {"label": "mcar_50", "mechanism": "mcar", "rate": 0.5},
+    {"label": "effect_50", "mechanism": "effect_dependent", "rate": 0.5}
+  ],
+  "selection_levels": ["training_only"],
+  "expected_cells": 81,
+  "design_sha256": "b655a1c31fc557add4db66424c44688765025b86cc4e7dd5a8d320bad567ae78"
+}

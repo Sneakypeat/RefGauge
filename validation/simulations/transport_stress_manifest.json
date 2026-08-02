@@ -1,0 +1,52 @@
+{
+  "schema_version": 2,
+  "profile": "transport_stress_fractional",
+  "description": "Corrected frozen multifeature transport-stress simulation, 2026-08-01; training-only selection is independent of target availability and point diagnostics are shared rather than attributed to interval methods",
+  "master_seed": 20260801,
+  "alpha": 0.05,
+  "full_replicates_by_p": {
+    "100": 1000,
+    "1000": 1000,
+    "10000": 250
+  },
+  "full_profile_note": "A run is full only when every cell uses the replicate count declared for its p value. Smaller runs are smoke or development runs.",
+  "smoke_replicates": 2,
+  "default_nnf_draws": 25000,
+  "default_pi_features": 12,
+  "selection_fraction": 0.2,
+  "minimum_training_studies": 5,
+  "block_size": 50,
+  "fractional_design": {
+    "type": "L27 orthogonal array crossed with missingness and selection",
+    "base_coordinates": ["a", "b", "c"],
+    "core_factor_columns_modulo_3": {
+      "p": "a",
+      "target_bias": "b",
+      "target_scale": "c",
+      "truth": "a+b",
+      "block_rho": "a+c",
+      "k": "b+c"
+    },
+    "properties": "All core-factor levels are balanced and every core-factor level pair occurs equally often. Missingness and selection are fully crossed with the L27 array."
+  },
+  "core_levels": {
+    "p": [100, 1000, 10000],
+    "target_bias": [0.0, 0.2, 0.5],
+    "target_scale": [1.0, 0.8, 1.25],
+    "truth": ["null", "sparse_10pct", "dense_70pct"],
+    "block_rho": [0.0, 0.3, 0.7],
+    "k": [6, 15, 30]
+  },
+  "missingness_levels": [
+    {"label": "mcar_0", "mechanism": "mcar", "rate": 0.0},
+    {"label": "mcar_20", "mechanism": "mcar", "rate": 0.2},
+    {"label": "mcar_50", "mechanism": "mcar", "rate": 0.5},
+    {"label": "abundance_20", "mechanism": "abundance_dependent", "rate": 0.2},
+    {"label": "abundance_50", "mechanism": "abundance_dependent", "rate": 0.5},
+    {"label": "effect_20", "mechanism": "effect_dependent", "rate": 0.2},
+    {"label": "effect_50", "mechanism": "effect_dependent", "rate": 0.5}
+  ],
+  "selection_levels": ["training_only", "target_informed_prohibited"],
+  "expected_cells": 378,
+  "design_sha256": "2079d452a283f097edbb544729920e94c1139f0870b66943dba1f6b75c64fe10"
+}

@@ -1,0 +1,36 @@
+{
+  "code_identities": {
+    "aggregation_code_sha256": "e374bd35bca7aecbcfbcd291ca4840609abe8488fcac9d7f731392832dd5a80e",
+    "manifest_sha256": "f002a04144c195540fadb3cd22a6775039b9c9659d967ff1d5cf0a9f13d3b04a",
+    "nnf_code_sha256": "3b3587a4605c9446de19b059662ac91504be233dab3252ef7a3b7999caeaacca",
+    "runner_code_sha256": "14cb5a317213dc1da30ed111f0f2a09270142c0757b862a1390849ab3e5fe2b5",
+    "simulation_code_sha256": "d7e8c60387f9c8c58dbca0a0ecd7112f9422945149d4f490698478417d962ba4"
+  },
+  "design_sha256": "2079d452a283f097edbb544729920e94c1139f0870b66943dba1f6b75c64fe10",
+  "full_replicates_by_p": {
+    "100": 1000,
+    "1000": 1000,
+    "10000": 250
+  },
+  "inferential_unit": "study",
+  "methods": [
+    "nnf_cd",
+    "reml_mkh_approx"
+  ],
+  "n_cells": 378,
+  "n_result_rows": 756,
+  "nnf_draws": 25000,
+  "outputs": {
+    "transport_stress_all_cells.tsv": "41963f26055016a7232002cfb247f19961427b1669f8bfafd2ce6b80f7aa6b94",
+    "transport_stress_failure_summary.tsv": "3a2f792eb6ddc4618475b4e1154626ffc2f62b96acfc69bce04384ea14123386",
+    "transport_stress_input_checksums.tsv": "ffbc3b1c772926bb7bb1d02491ab17343ca0f75f70c09607d4402d7f75f189b3",
+    "transport_stress_interval_summary.tsv": "ecafabdb98f42f937ee6c29f8c2da7120c791eda653918aaa7ac9a37e9320a5d",
+    "transport_stress_prohibited_selection_control.tsv": "838f4a4c4a4861bf891e5d42b14868f580c71c816efaf62b3a454f2861c39557",
+    "transport_stress_shared_point_summary.tsv": "e0086698adbe9de73ef5e86cb58f84bf2db25f60b45e45460b6f2d805b4210a7"
+  },
+  "pi_features": 12,
+  "point_metrics": "shared_dl_diagnostics_not_attributed_to_interval_methods",
+  "schema_version": 2,
+  "target_informed_selection": "prohibited_negative_control_only",
+  "training_only_selection": "independent_of_target_availability_and_outcomes"
+}

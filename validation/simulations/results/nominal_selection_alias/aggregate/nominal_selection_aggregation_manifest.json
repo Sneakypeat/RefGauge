@@ -1,0 +1,34 @@
+{
+  "code_identities": {
+    "aggregation_code_sha256": "e374bd35bca7aecbcfbcd291ca4840609abe8488fcac9d7f731392832dd5a80e",
+    "manifest_sha256": "a5f9a08404a6f977adaa84f8008bdaccd85276590edcd37767bcbce591f0767f",
+    "nnf_code_sha256": "521b97e3da51c73933025989cf5c815638dfbb0b2d781759078deff405338d14",
+    "runner_code_sha256": "809a105747f197847f00ce26a933520bb1f8d25bcfffb2f28c5415ac3649321a",
+    "simulation_code_sha256": "587c37567311612019bdf7dc3b280fc235e93ec36f166a48b7a8e065b6c3546b"
+  },
+  "design_sha256": "b655a1c31fc557add4db66424c44688765025b86cc4e7dd5a8d320bad567ae78",
+  "full_replicates_by_p": {
+    "1000": 1000
+  },
+  "inferential_unit": "study",
+  "methods": [
+    "nnf_cd",
+    "reml_mkh_approx"
+  ],
+  "n_cells": 81,
+  "n_result_rows": 162,
+  "nnf_draws": 25000,
+  "outputs": {
+    "nominal_selection_all_cells.tsv": "65362f4f2f2c0e30163e76926a644c328a4bddbc836b952f0d047856ffa5e02d",
+    "nominal_selection_failure_summary.tsv": "6b3139aa74318ddf6a8f7223e9e312597005e60072b3b08e0ba1adfd6b302373",
+    "nominal_selection_input_checksums.tsv": "769370bed50d576e3b31d26f127bf186963a6cbc3a29e477d9b3da00eecd58d4",
+    "nominal_selection_interval_summary.tsv": "ca82c0f1b7670ab81fe3811208b84010476d9f937fcc69587d8597aa725e9660",
+    "nominal_selection_prohibited_selection_control.tsv": "aedca9dcbd2c0bba4a59b1992f25f436528f6637997f1f4da7aeb7a7a5bbe16a",
+    "nominal_selection_shared_point_summary.tsv": "539b633ac1c6100966c2ac563d1a5f633889bb3fd04ae318bb2e3c0e3feb8f6a"
+  },
+  "pi_features": 12,
+  "point_metrics": "shared_dl_diagnostics_not_attributed_to_interval_methods",
+  "schema_version": 1,
+  "target_informed_selection": "not_included",
+  "training_only_selection": "independent_of_target_availability_and_outcomes"
+}

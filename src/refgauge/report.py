@@ -14,6 +14,14 @@ import numpy as np
 import pandas as pd
 
 
+def _stable_histogram_bins(values: pd.Series | np.ndarray, default: int = 35) -> int:
+    finite = np.asarray(values, dtype=float)
+    finite = finite[np.isfinite(finite)]
+    if len(finite) < 2 or np.isclose(np.ptp(finite), 0.0):
+        return 1
+    return default
+
+
 def calibration_figure(predictions: pd.DataFrame, path: Path) -> None:
     fig, axes = plt.subplots(1, 2, figsize=(10.5, 4.4))
     ax = axes[0]
@@ -27,11 +35,18 @@ def calibration_figure(predictions: pd.DataFrame, path: Path) -> None:
 
     ax = axes[1]
     z = predictions["standardized_discrepancy"].dropna()
-    ax.hist(z, bins=35, color="#276FBF", alpha=0.8)
-    ax.axvline(-1.96, color="#D1495B", linestyle="--", linewidth=1)
-    ax.axvline(1.96, color="#D1495B", linestyle="--", linewidth=1)
+    if len(z):
+        boundary = 1.96
+        x_label = "Standardized direct-minus-predicted discrepancy"
+    else:
+        z = predictions["interval_relative_discrepancy"].dropna()
+        boundary = 1.0
+        x_label = "Held-out position relative to compatibility half-width"
+    ax.hist(z, bins=_stable_histogram_bins(z), color="#276FBF", alpha=0.8)
+    ax.axvline(-boundary, color="#D1495B", linestyle="--", linewidth=1)
+    ax.axvline(boundary, color="#D1495B", linestyle="--", linewidth=1)
     ax.set(
-        xlabel="Standardized direct-minus-predicted discrepancy",
+        xlabel=x_label,
         ylabel="Count",
         title="Calibration",
     )
@@ -44,7 +59,8 @@ def reference_figure(
     feature_sensitivity: pd.DataFrame, rank_stability: pd.DataFrame, path: Path
 ) -> None:
     fig, axes = plt.subplots(1, 2, figsize=(10.5, 4.4))
-    axes[0].hist(feature_sensitivity["estimate_range"], bins=35, color="#2A9D8F", alpha=0.85)
+    ranges = feature_sensitivity["estimate_range"]
+    axes[0].hist(ranges, bins=_stable_histogram_bins(ranges), color="#2A9D8F", alpha=0.85)
     axes[0].set(
         xlabel="Estimate range across references", ylabel="Features", title="Magnitude sensitivity"
     )
@@ -73,8 +89,9 @@ th:first-child, td:first-child { text-align: left; }
 .note { background: #f5f7f8; border-left: 4px solid #276FBF; padding: .8rem 1rem; }
 """
     note = (
-        "Cross-study estimates are predictions. Coverage and discrepancy must be interpreted "
-        "with the declared target-study exclusion and reference definition."
+        "Cross-study estimates are conditional compatibility predictions. Lead with the "
+        "equal-study macro row; observed-target coverage is conditional on the held-out "
+        "target SE and numerical success, with failure bounds reported separately."
     )
     body = (
         '<!doctype html><html lang="en"><head><meta charset="utf-8">'

@@ -1,17 +1,16 @@
 cff-version: 1.2.0
-message: "If you use ContrastCal, please cite this software release."
-title: "ContrastCal: calibration of cross-study biological contrasts"
+message: "If you use RefGauge, please cite this software release."
+title: "RefGauge: reference-aware transport auditing for cross-study omics"
 type: software
-version: 0.1.0
-date-released: 2026-08-01
+version: 0.2.0
+date-released: 2026-08-03
 authors:
   - family-names: Syed
     given-names: Sabih Ur Rehman
-repository-code: "https://github.com/Sneakypeat/ContrastCal"
+repository-code: "https://github.com/Sneakypeat/RefGauge"
 license: BSD-3-Clause
 keywords:
   - meta-analysis
-  - calibration
+  - reference sensitivity
   - cross-study transport
   - organoid fidelity
-

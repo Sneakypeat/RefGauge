@@ -1,20 +1,21 @@
 [build-system]
-requires = ["hatchling>=1.25"]
+requires = ["hatchling>=1.25,<2"]
 build-backend = "hatchling.build"
 
 [project]
-name = "contrastcal"
-version = "0.1.0"
-description = "Calibrate cross-study biological contrasts against direct within-study evidence."
+name = "refgauge"
+dynamic = ["version"]
+description = "Audit reference dependence and held-out study transport in cross-study omics."
 readme = "README.md"
 requires-python = ">=3.10"
-license = {file = "LICENSE"}
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
 authors = [
   {name = "Sabih Ur Rehman Syed"}
 ]
 keywords = [
-  "calibration", "meta-analysis", "cross-study", "reproducibility",
-  "transcriptomics", "organoids"
+  "reference sensitivity", "meta-analysis", "cross-study", "transportability",
+  "reproducibility", "transcriptomics", "organoids"
 ]
 classifiers = [
   "Development Status :: 3 - Alpha",
@@ -28,34 +29,50 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Bio-Informatics"
 ]
 dependencies = [
-  "numpy>=1.24",
-  "pandas>=2.0",
-  "scipy>=1.10",
-  "matplotlib>=3.7"
+  "numpy>=1.24,<3",
+  "pandas>=2.0,<4",
+  "scipy>=1.10,<2",
+  "matplotlib>=3.7,<4"
 ]
 
 [project.optional-dependencies]
 dev = [
-  "build>=1.2",
-  "pytest>=8.0",
-  "pytest-cov>=5.0",
-  "ruff>=0.6"
+  "build>=1.2,<2",
+  "check-wheel-contents>=0.6,<1",
+  "pytest>=8.0,<10",
+  "pytest-cov>=5.0,<8",
+  "ruff>=0.6,<1",
+  "twine>=5,<7"
 ]
 
 [project.scripts]
-contrastcal = "contrastcal.cli:main"
+refgauge = "refgauge.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/Sneakypeat/ContrastCal"
-Documentation = "https://github.com/Sneakypeat/ContrastCal#readme"
-Issues = "https://github.com/Sneakypeat/ContrastCal/issues"
+Homepage = "https://github.com/Sneakypeat/RefGauge"
+Documentation = "https://github.com/Sneakypeat/RefGauge#readme"
+Issues = "https://github.com/Sneakypeat/RefGauge/issues"
+Changelog = "https://github.com/Sneakypeat/RefGauge/blob/main/CHANGELOG.md"
+Source = "https://github.com/Sneakypeat/RefGauge"
+
+[tool.hatch.version]
+path = "src/refgauge/__init__.py"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/contrastcal"]
+packages = ["src/refgauge"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-ra --strict-markers"
+addopts = "-ra --strict-config --strict-markers"
+
+[tool.coverage.run]
+branch = true
+source = ["refgauge"]
+
+[tool.coverage.report]
+fail_under = 90
+show_missing = true
+skip_covered = true
 
 [tool.ruff]
 line-length = 100
@@ -63,4 +80,3 @@ target-version = "py310"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]
-

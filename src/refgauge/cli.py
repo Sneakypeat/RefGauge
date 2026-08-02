@@ -1,4 +1,4 @@
-"""Command line interface for ContrastCal."""
+"""Command line interface for RefGauge."""
 
 from __future__ import annotations
 
@@ -11,14 +11,15 @@ import pandas as pd
 
 from . import __version__
 from .calibration import calibrate_loso, calibration_summary
-from .reference import audit_references
-from .report import calibration_figure, reference_figure, write_html_report
+from .reference import audit_references, compare_reference_pairs
 from .simulation import write_demo
 from .validation import validate_effects
 
 
 def _read(path: Path) -> pd.DataFrame:
-    return pd.read_csv(path, sep="\t" if path.suffix.lower() in {".tsv", ".txt"} else ",")
+    suffixes = {suffix.lower() for suffix in path.suffixes}
+    separator = "\t" if suffixes.intersection({".tsv", ".txt"}) else ","
+    return pd.read_csv(path, sep=separator)
 
 
 def _json_ready(frame: pd.DataFrame) -> list[dict]:
@@ -27,10 +28,21 @@ def _json_ready(frame: pd.DataFrame) -> list[dict]:
 
 
 def run_calibrate(args: argparse.Namespace) -> None:
+    from .report import calibration_figure, write_html_report
+
     outdir = args.output
     outdir.mkdir(parents=True, exist_ok=True)
     effects = validate_effects(_read(args.effects))
-    predictions = calibrate_loso(effects, method=args.method, alpha=args.alpha)
+    predictions = calibrate_loso(
+        effects,
+        method=args.method,
+        interval_method=args.interval_method,
+        alpha=args.alpha,
+        min_training_studies=args.min_training_studies,
+        nnf_draws=args.nnf_draws,
+        seed=args.seed,
+        nnf_failure_policy=args.nnf_failure_policy,
+    )
     summary = calibration_summary(predictions, strong_threshold=args.strong_threshold)
     predictions.to_csv(outdir / "loso_predictions.tsv", sep="\t", index=False)
     summary.to_csv(outdir / "calibration_summary.tsv", sep="\t", index=False)
@@ -39,7 +51,7 @@ def run_calibrate(args: argparse.Namespace) -> None:
     )
     calibration_figure(predictions, outdir / "calibration_diagnostic.png")
     write_html_report(
-        "ContrastCal leave-one-study-out calibration",
+        f"RefGauge leave-one-study-out calibration ({args.interval_method})",
         summary,
         "calibration_diagnostic.png",
         outdir / "report.html",
@@ -47,26 +59,38 @@ def run_calibrate(args: argparse.Namespace) -> None:
 
 
 def run_reference(args: argparse.Namespace) -> None:
+    from .report import reference_figure, write_html_report
+
     outdir = args.output
     outdir.mkdir(parents=True, exist_ok=True)
-    sensitivity, ranks = audit_references(_read(args.contrasts))
+    contrasts = _read(args.contrasts)
+    sensitivity, ranks = audit_references(contrasts)
+    comparisons = compare_reference_pairs(contrasts)
     sensitivity.to_csv(outdir / "reference_feature_sensitivity.tsv", sep="\t", index=False)
     ranks.to_csv(outdir / "reference_rank_stability.tsv", sep="\t", index=False)
+    comparisons.to_csv(outdir / "reference_pairwise_descriptive.tsv", sep="\t", index=False)
+    reported_ranks = ranks.loc[ranks["rank_metrics_reported"]]
     summary = pd.DataFrame(
         [
             {
                 "n_features": len(sensitivity),
-                "median_estimate_range": sensitivity["estimate_range"].median(),
-                "fraction_sign_flips": sensitivity["sign_flip"].mean(),
-                "median_rank_spearman": ranks["spearman_rank"].median(),
-                "median_top10_jaccard": ranks["top10_jaccard"].median(),
+                "median_estimate_range_noise_unadjusted": sensitivity["estimate_range"].median(),
+                "fraction_raw_sign_flips_noise_unadjusted": sensitivity[
+                    "raw_sign_flip_noise_unadjusted"
+                ].mean(),
+                "n_pairwise_descriptive_comparisons": len(comparisons),
+                "pairwise_inference": "not_performed_shared_target_covariance_not_supplied",
+                "n_rank_pairs_reported": len(reported_ranks),
+                "n_rank_pairs_withheld_low_overlap": int((~ranks["rank_metrics_reported"]).sum()),
+                "median_rank_spearman_reported_pairs": reported_ranks["spearman_rank"].median(),
+                "median_top10_jaccard_reported_pairs": reported_ranks["top10_jaccard"].median(),
             }
         ]
     )
     summary.to_csv(outdir / "reference_summary.tsv", sep="\t", index=False)
     reference_figure(sensitivity, ranks, outdir / "reference_diagnostic.png")
     write_html_report(
-        "ContrastCal reference-anchor audit",
+        "RefGauge reference-anchor audit",
         summary,
         "reference_diagnostic.png",
         outdir / "report.html",
@@ -81,7 +105,12 @@ def run_demo(args: argparse.Namespace) -> None:
             effects=effect_path,
             output=args.output / "calibration",
             method="reml",
+            interval_method="reml_mkh_approx",
             alpha=0.05,
+            min_training_studies=3,
+            nnf_draws=5_000,
+            seed=args.seed,
+            nnf_failure_policy="raise",
             strong_threshold=0.5,
         )
     )
@@ -91,7 +120,7 @@ def run_demo(args: argparse.Namespace) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="contrastcal", description=__doc__)
+    parser = argparse.ArgumentParser(prog="refgauge", description=__doc__)
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     sub = parser.add_subparsers(dest="command", required=True)
 
@@ -99,7 +128,35 @@ def build_parser() -> argparse.ArgumentParser:
     cal.add_argument("--effects", type=Path, required=True)
     cal.add_argument("--output", type=Path, required=True)
     cal.add_argument("--method", choices=["reml", "dl"], default="reml")
+    cal.add_argument(
+        "--interval-method",
+        choices=[
+            "nnf_cd",
+            "fixed_normal",
+            "dl_normal",
+            "reml_normal",
+            "reml_mkh_approx",
+            "unweighted_t",
+        ],
+        default="nnf_cd",
+    )
     cal.add_argument("--alpha", type=float, default=0.05)
+    cal.add_argument(
+        "--min-training-studies",
+        type=int,
+        default=None,
+        help=(
+            "Defaults to 5 for NNF and 3 for comparators; NNF below 5 is for method validation only"
+        ),
+    )
+    cal.add_argument("--nnf-draws", type=int, default=25_000)
+    cal.add_argument(
+        "--nnf-failure-policy",
+        choices=["record", "raise"],
+        default="record",
+        help="Record numerical failures without fallback, or abort immediately",
+    )
+    cal.add_argument("--seed", type=int, default=20260801)
     cal.add_argument("--strong-threshold", type=float, default=0.5)
     cal.set_defaults(func=run_calibrate)
 

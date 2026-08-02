@@ -16,18 +16,21 @@
 Software quality is necessary but not sufficient for a high-impact methods paper.
 The empirical paper proceeds only when all of the following hold:
 
-1. at least two independent direct-comparison datasets can be held out completely;
+1. a controlled cross-laboratory benchmark and an independent naturalistic benchmark
+   with at least 16 total studies are available, leaving 15 training studies per fold;
 2. atlas predictions exclude the target from feature selection, reference learning,
    cell annotation, age estimation, and effect pooling;
 3. results survive age, cell identity, assay, pseudobulk, effect-scale, and reference
    sensitivities;
 4. simulation benchmarks cover realistic study counts, heterogeneity, missingness,
    selection, and standard-error misspecification;
-5. ContrastCal changes at least one substantive inference relative to conventional
+5. RefGauge changes at least one substantive inference relative to conventional
    pooled analysis without overstating which reference is biologically correct;
-6. a non-organoid benchmark demonstrates that the estimator is generally useful.
+6. the cortical-organoid application is kept separate from the general calibration
+   claim and does not manufacture study replication from cells, regions, or batches.
 
 Without items 1-5, the software remains a research release and the cortical analysis
-remains feasibility evidence. Without item 6, Genome Biology or Cell Genomics is a
-more defensible target than Nature Methods.
-
+remains bounded descriptive evidence rather than calibrated validation. A Nature
+Methods submission additionally requires NNF coverage/sharpness simulations, an
+established-method comparison, project-level technical transport, and a credible
+biological use case.

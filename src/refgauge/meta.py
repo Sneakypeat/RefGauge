@@ -1,4 +1,4 @@
-"""Small-study random-effects estimators used by ContrastCal."""
+"""Small-study random-effects estimators used by RefGauge."""
 
 from __future__ import annotations
 
@@ -61,7 +61,11 @@ def reml_tau2(estimate: np.ndarray, se: np.ndarray) -> float:
 
     scale = max(float(np.var(y, ddof=1)), float(np.max(variance)), 1e-8)
     fit = optimize.minimize_scalar(objective, bounds=(0.0, 100.0 * scale), method="bounded")
-    return float(max(0.0, fit.x)) if fit.success else dersimonian_laird_tau2(y, s)
+    if not fit.success or not np.isfinite(fit.x):
+        return dersimonian_laird_tau2(y, s)
+    tau2 = float(max(0.0, fit.x))
+    boundary_tolerance = max(1e-12, scale * 1e-8)
+    return 0.0 if objective(0.0) <= objective(tau2) + boundary_tolerance else tau2
 
 
 def random_effects(
@@ -78,6 +82,12 @@ def random_effects(
     collections. A one-study group is returned unchanged and should not be treated
     as a cross-study estimate.
     """
+    if method not in {"reml", "dl"}:
+        raise ValueError("method must be 'reml' or 'dl'")
+    if not isinstance(alpha, (int, float, np.integer, np.floating)) or not (
+        np.isfinite(alpha) and 0 < alpha < 1
+    ):
+        raise ValueError("alpha must be finite and between zero and one")
     y, s = _clean(estimate, se)
     k = len(y)
     if k == 0:
@@ -95,9 +105,6 @@ def random_effects(
             1,
             "single-study",
         )
-    if method not in {"reml", "dl"}:
-        raise ValueError("method must be 'reml' or 'dl'")
-
     tau2 = reml_tau2(y, s) if method == "reml" else dersimonian_laird_tau2(y, s)
     weights = 1.0 / (s**2 + tau2)
     pooled = float(np.sum(weights * y) / np.sum(weights))

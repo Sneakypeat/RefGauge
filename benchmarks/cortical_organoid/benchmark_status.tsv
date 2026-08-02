@@ -1,5 +1,5 @@
 analysis	status	primary_result	limitation
-Trevino reference audit	stands	Glial divergence spans 0.93%-26.37% across defensible references	Motivating study; not a universal estimate
-Camp-HNOCA transport	feasibility	Pearson 0.150-0.212; coverage 62.4%-69.6%	Target contributes to published reference; age mismatch; small n
-Multi-study LOSO validation	pending	NA	Requires at least two clean target-study-excluded direct comparisons
-
+Trevino reference audit	stands_bounded	Glial q<0.01 discovery rate spans 0.93%-26.37%; 28.3-fold is a thresholded-rate ratio	Neuronal 29.01% maximum uses an identity-mismatched astrocyte anchor; motivating study, not a universal estimate
+Camp-HNOCA transport	superseded_feasibility	Pearson 0.150-0.212; legacy nominal coverage 62.4%-69.6%	Target contributes to published reference; age mismatch; small n; not the released estimator
+Four-study descriptive transport	stands_bounded	12538 genes; pairwise Pearson 0.388; LOSO Pearson 0.504; sign agreement 0.667	Camp/Cheroni/Herring/Kang; sensitivity-stable point metrics, but only k=3 training studies per fold
+Four-study interval calibration	withheld	Approximate coverage 0.9998 with median latent/observed widths 14.2/18.2 log2 units	Intervals are uninformatively wide; primary NNF requires at least five training studies per fold
