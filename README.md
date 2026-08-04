@@ -4,6 +4,7 @@
 
 [![Tests](https://github.com/Sneakypeat/RefGauge/actions/workflows/tests.yml/badge.svg)](https://github.com/Sneakypeat/RefGauge/actions/workflows/tests.yml)
 [![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD--3--Clause-blue.svg)](LICENSE)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21794555.svg)](https://doi.org/10.5281/zenodo.21794555)
 
 Cross-study comparisons are often interpreted as properties of a model or condition,
 even though their magnitude can depend on the study, reference population, age,
