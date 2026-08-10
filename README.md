@@ -8,13 +8,16 @@
 
 Cross-study comparisons are often interpreted as properties of a model or condition,
 even though their magnitude can depend on the study, reference population, age,
-assay, and preprocessing pipeline. RefGauge turns that concern into two explicit,
+assay, and preprocessing pipeline. RefGauge turns that concern into three explicit,
 auditable analyses:
 
 1. **Transport audit:** can an estimate pooled from other studies predict a
    direct effect in a held-out study?
 2. **Reference audit:** how much do effect magnitude, sign, and feature ranking change
    when the reference anchor changes?
+3. **Reference-family standardisation:** is target discrepancy greater than ordinary
+   primary-primary disagreement over a declared finite reference family, with joint
+   source uncertainty and a mandatory abstention when the design is not identifiable?
 
 The package was motivated by human cortical-organoid fidelity studies, but its input
 contract is generic: one estimate and standard error per feature, study, and optional
@@ -40,6 +43,11 @@ biological stratum.
   heterogeneity, with naive WLS labelled as a sensitivity;
 - reference-dependent raw ranges, point-sign changes, rank correlations, and top-set
   overlap; no pairwise p-values are emitted without shared-target covariance;
+- finite-family excess-discrepancy estimates, anchor residuals, source-deletion
+  diagnostics, and machine-readable identification gates;
+- no standardised scalar when the expected-edge design is undeclared, the reference
+  family is too small, directly uncrossed, leaked, missing a joint source bootstrap,
+  or unstable beyond a prespecified margin;
 - machine-readable TSV/JSON outputs, diagnostic PNGs, and a self-contained HTML report.
 
 ## Installation
@@ -47,7 +55,7 @@ biological stratum.
 From a tagged GitHub release:
 
 ```bash
-pip install "refgauge @ git+https://github.com/Sneakypeat/RefGauge.git@v0.2.0"
+pip install "refgauge @ git+https://github.com/Sneakypeat/RefGauge.git@v0.3.0"
 ```
 
 For development:
@@ -70,6 +78,23 @@ refgauge reference-audit \
   --contrasts examples/references_template.tsv \
   --output example_reference_audit
 ```
+
+The inferential standardisation path uses direct organoid-primary (`OP`) and
+primary-primary (`PP`) discrepancies plus a joint source-level bootstrap:
+
+```bash
+refgauge reference-standardize \
+  --edges reference_edges.tsv \
+  --design reference_expected_cells.tsv \
+  --bootstrap reference_bootstrap.tsv.gz \
+  --delta-ref 0.05 \
+  --output reference_standardization
+```
+
+The design table is written before inspecting which edge estimates are available and
+lists every expected source-level OP and PP cell. Omitting it, the bootstrap, or the
+prespecified `delta-ref` is allowed so an existing dataset can be audited, but each
+omission forces a named abstention rather than an inferred standardised score.
 
 ## Five-minute demo
 
@@ -124,7 +149,11 @@ See [Input contracts](docs/input_contracts.md) and
 ## Interpretation boundary
 
 RefGauge does not produce a universal fidelity score, repair confounded study
-designs, or make heterogeneous cell identities comparable. A high cross-study
+designs, or make heterogeneous cell identities comparable. Version 0.3 can report a
+reference-standardised excess discrepancy only for a declared biological domain and
+finite primary-reference family that passes its frozen identification gates. This
+quantity is not percent brain, a latent fidelity trait, or a prediction for a new
+laboratory. A high cross-study
 correlation can coexist with poor interval coverage; a low correlation can reflect
 restricted effect ranges. The primary objects are retrospective compatibility of an
 excluded target with an exchangeable-study predictive distribution, equal-study

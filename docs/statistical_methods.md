@@ -105,12 +105,65 @@ the variance of their difference. RefGauge therefore emits no pairwise p-values,
 FDR values, or inferential sign-change labels without covariance. Rank correlation and
 top-set overlap are withheld when fewer than 10 features are shared.
 
+## Finite reference-family standardisation
+
+Version 0.3 adds a gated inferential path for a declared biological domain and a
+finite family of independent primary sources. Let `D_OP[t,r]` be the discrepancy of
+target preparation `t` from primary anchor `r`, and let `D_PP[q,r]` be the discrepancy
+of an independent primary source `q` from that same anchor. For each anchor,
+
+Before estimates are read, an expected-edge design enumerates every source-level OP
+and PP cell. This declaration fixes the primary-source, target-source, and biological-
+unit universes and the required direct crossings. Observed edges are checked against
+that universe but never define it. If the declaration is absent, point quantities
+below remain available as diagnostics and inference is withheld.
+
+`B[r] = equal-source mean over q != source(r) of D_PP[q,r]`
+
+is ordinary primary-primary disagreement. The target's anchor-specific excess is
+
+`e[t,r] = D_OP[t,r] - B[r]`.
+
+RefGauge reports the equal-source mean excess over the declared family,
+
+`Delta[t | R] = equal-source mean over r of e[t,r]`,
+
+and residual reference dependence,
+
+`A[t | R] = max_r abs(e[t,r] - Delta[t | R])`.
+
+Equal-source weighting is hierarchical: anchors are averaged within reference
+source, target biological units within target source, and target sources with equal
+weight. This prevents studies with more batches or atlas subdivisions from acquiring
+more inferential weight. Every `B` and `e` remains in the output so the aggregate is
+auditable.
+
+Confidence limits are obtained from a joint cluster bootstrap that refits all learned
+metric components and preserves shared-target and shared-reference covariance.
+Standardisation is emitted only when the declared-design, direct-crossing,
+independence, bootstrap, covariance, and reference-stability gates pass. The
+simultaneous upper bound for `A`
+and every leave-one-primary-source movement must be no larger than a prespecified
+`delta_ref`. A protocol-level claim additionally requires the same protocol in at
+least three independent laboratories. Otherwise the maximum scope is preparation
+specific.
+
+Failed gates do not erase the observed contrasts. RefGauge writes the reference
+baselines, anchor-specific excesses, source-deletion diagnostics, and every gate
+result, while the headline state records why standardisation was withheld. The
+quantity is conditional on the declared finite family. It is not a universal fidelity
+score, a new-laboratory prediction, or evidence that the primary references measure a
+single latent biological construct.
+
 ## Current limits
 
 - NNF can be computationally expensive for very large feature-by-study matrices.
 - Standard errors are assumed valid and effects must be on a common scale.
 - Shared-reference covariance is not identifiable from contrast-level standard
   errors alone.
+- Finite-family standardisation requires an independently declared expected-cell
+  design, at least six independent primary sources, and a joint source-level
+  bootstrap; an observed or merely connected graph is insufficient.
 - Exchangeable-study prediction does not repair systematic target bias, scale shifts,
   reference mismatch, or effect modification.
 - Feature dependence, missing-not-at-random effects, and target-informed selection

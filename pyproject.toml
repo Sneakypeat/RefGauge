@@ -11,7 +11,7 @@ requires-python = ">=3.10"
 license = "BSD-3-Clause"
 license-files = ["LICENSE"]
 authors = [
-  {name = "Sabih Ur Rehman Syed"}
+  {name = "Syed Sabih ur Rehman"}
 ]
 keywords = [
   "reference sensitivity", "meta-analysis", "cross-study", "transportability",

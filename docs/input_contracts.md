@@ -51,3 +51,77 @@ Leave-one-study-out calibration is only clean when the target study is absent fr
 
 RefGauge can exclude rows by study identifier, but cannot discover upstream
 leakage. Record upstream provenance in the manuscript and released data dictionary.
+
+## Reference-family standardisation tables
+
+The `reference-standardize` command is a separate inferential path. It does not turn
+the descriptive reference table above into a corrected score. It requires direct
+target-primary (`OP`) and primary-primary (`PP`) discrepancies constructed with one
+frozen metric and feature definition.
+
+Inference first requires an expected-cell design table written independently of the
+observed results. It has exactly these identifiers:
+
+| column | meaning |
+|---|---|
+| `domain` | frozen biological and analytical domain identifier |
+| `feature` | endpoint or programme standardised independently |
+| `edge_type` | exactly `OP` or `PP` |
+| `target` | target preparation for OP; primary comparison target for PP |
+| `target_unit` | expected independent donor, line, organoid, or preparation unit |
+| `target_source` | expected independent laboratory or source-study identifier |
+| `reference_source` | expected independent source study supplying the anchor |
+
+The seven-column tuple must be unique, every domain-feature group must contain OP and
+PP cells, and same-source PP cells are forbidden. The table has no `estimate` and no
+anchor identifier because it declares source-level cells, not observed values. The
+primary-source, target-source, and biological-unit universes are taken from this
+table. RefGauge expands those declared units over the declared primary sources to
+test the complete direct OP and cross-source PP Cartesian crossings. Consequently, a
+cell that is expected but wholly absent from the point table remains a counted
+missing cell. The software cannot discover a source or unit omitted from the design;
+the design itself is therefore part of the scientific declaration.
+
+The point-edge table requires:
+
+| column | meaning |
+|---|---|
+| `domain` | frozen biological and analytical domain identifier |
+| `feature` | endpoint or programme standardised independently |
+| `edge_type` | exactly `OP` or `PP` |
+| `target` | target preparation for OP; primary comparison target for PP |
+| `target_unit` | independent donor, line, organoid, or preparation unit |
+| `target_source` | independent laboratory or source-study identifier |
+| `reference` | directly evaluated primary anchor |
+| `reference_source` | independent source study supplying that anchor |
+| `estimate` | finite discrepancy, with one declared orientation for every edge |
+| `admissible` | whether the edge belongs to the frozen reference family |
+| `leakage` | whether target information entered reference or metric fitting |
+
+The eight-column tuple `(domain, feature, edge_type, target, target_unit,
+target_source, reference, reference_source)` must be unique. Every admitted observed
+source-level cell must occur in the design. Inadmissible rows may remain as an audit
+trail but cannot satisfy a declared cell. Every expected target must be crossed
+directly with every declared reference source, and every expected cross-source PP
+comparison must be observed. Graph-path imputation does not satisfy this contract.
+At least six independent primary sources and three biological units per source are
+required by the v0.3 inferential contract.
+
+Supplying `--design` is optional only to support descriptive recovery of legacy
+edge tables. Without it, RefGauge still reports point baselines and anchor excesses
+but fails `G1_DECLARED_DESIGN` and returns
+`ABSTAIN_UNDECLARED_REFERENCE_DESIGN`.
+
+The optional joint-bootstrap table has the same columns plus `draw`. Each draw must
+resample biological units at source level and refit marker selection, latent mapping,
+feature filtering, and every other learned metric component. The same source draw
+must be reused across all edges containing that source. Marginal edge standard errors
+or independently bootstrapped edges do not recover the required covariance. Version
+0.3 requires at least 5,000 draws and at least 95% complete draws.
+
+`delta_ref` is the largest scientifically tolerable residual change caused only by
+the admitted reference. It must be chosen before target outcomes are inspected. If it
+is omitted, RefGauge preserves point diagnostics and returns
+`ABSTAIN_UNFROZEN_TOLERANCE`. An optional positive `delta_bio` may classify the
+excess discrepancy as within-envelope, divergent, or unresolved; it is never learned
+from the observed target scores.

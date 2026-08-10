@@ -76,7 +76,54 @@ def reference_figure(
     plt.close(fig)
 
 
-def write_html_report(title: str, summary: pd.DataFrame, figure_name: str, path: Path) -> None:
+def reference_standardization_figure(
+    anchor_excess: pd.DataFrame, gates: pd.DataFrame, path: Path
+) -> None:
+    """Show retained anchor diagnostics and the gate decision without implying a score."""
+
+    fig, axes = plt.subplots(1, 2, figsize=(10.5, 4.4))
+    ax = axes[0]
+    value_column = next(
+        (name for name in ("anchor_excess", "excess", "e") if name in anchor_excess), None
+    )
+    if value_column is not None:
+        values = pd.to_numeric(anchor_excess[value_column], errors="coerce").dropna()
+        ax.hist(values, bins=_stable_histogram_bins(values), color="#2A9D8F", alpha=0.85)
+    else:
+        ax.text(0.5, 0.5, "No anchor residuals available", ha="center", va="center")
+    ax.axvline(0, color="#555555", linewidth=1, linestyle="--")
+    ax.set(
+        xlabel="Anchor-specific excess discrepancy",
+        ylabel="Edges",
+        title="Reference-family diagnostics",
+    )
+
+    ax = axes[1]
+    gate_column = "gate_id" if "gate_id" in gates else "gate"
+    if {gate_column, "passed"}.issubset(gates.columns) and len(gates):
+        gate_summary = gates.groupby(gate_column, sort=False)["passed"].all()
+        colors = np.where(gate_summary.to_numpy(dtype=bool), "#2A9D8F", "#D1495B")
+        positions = np.arange(len(gate_summary))
+        ax.barh(positions, np.ones(len(gate_summary)), color=colors, alpha=0.9)
+        ax.set_yticks(positions, labels=gate_summary.index)
+        ax.set_xticks([])
+        ax.invert_yaxis()
+    else:
+        ax.text(0.5, 0.5, "No gate results available", ha="center", va="center")
+    ax.set(title="Identification gates")
+    fig.tight_layout()
+    fig.savefig(path, dpi=180, bbox_inches="tight")
+    plt.close(fig)
+
+
+def write_html_report(
+    title: str,
+    summary: pd.DataFrame,
+    figure_name: str,
+    path: Path,
+    *,
+    note: str | None = None,
+) -> None:
     table = summary.to_html(index=False, float_format=lambda x: f"{x:.4g}", border=0)
     style = """
 body { font-family: system-ui, sans-serif; max-width: 1100px; margin: 2rem auto;
@@ -88,11 +135,12 @@ th, td { padding: .45rem .55rem; border-bottom: 1px solid #ddd; text-align: righ
 th:first-child, td:first-child { text-align: left; }
 .note { background: #f5f7f8; border-left: 4px solid #276FBF; padding: .8rem 1rem; }
 """
-    note = (
-        "Cross-study estimates are conditional compatibility predictions. Lead with the "
-        "equal-study macro row; observed-target coverage is conditional on the held-out "
-        "target SE and numerical success, with failure bounds reported separately."
-    )
+    if note is None:
+        note = (
+            "Cross-study estimates are conditional compatibility predictions. Lead with the "
+            "equal-study macro row; observed-target coverage is conditional on the held-out "
+            "target SE and numerical success, with failure bounds reported separately."
+        )
     body = (
         '<!doctype html><html lang="en"><head><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width">'

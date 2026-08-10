@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.3.0 - 2026-08-10
+
+- Added a finite-reference-family excess-discrepancy estimand calibrated against
+  direct primary-primary disagreement on the same metric.
+- Added hierarchical equal-source weighting, anchor-specific residuals, and
+  leave-one-primary-source diagnostics.
+- Added joint source-bootstrap confidence limits that retain shared target and
+  reference dependence.
+- Added strict direct-design, independence, covariance, reference-stability, and
+  protocol-transport gates.
+- Added an explicit expected source-level OP/PP design contract. Observed edges no
+  longer define their own crossing universe; omission produces
+  `ABSTAIN_UNDECLARED_REFERENCE_DESIGN` while retaining point diagnostics.
+- Added machine-readable abstention states and retained all descriptive diagnostics
+  when a standardised scalar is not identifiable.
+- Added the `reference-standardize` CLI command, tabular/JSON outputs, and an HTML
+  identification report.
+- Preserved the v0.2 descriptive `reference-audit` and held-out transport behavior
+  without changing their estimands.
+
 ## 0.2.0 - 2026-08-03
 
 - Renamed the project, Python package, CLI and public repository from ContrastCal to

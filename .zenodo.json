@@ -1,0 +1,31 @@
+{
+  "upload_type": "software",
+  "title": "RefGauge: reference-aware transport auditing and selective reference standardization for cross-study omics",
+  "version": "0.3.0",
+  "license": "bsd-3-clause",
+  "access_right": "open",
+  "creators": [
+    {
+      "name": "Syed, Sabih ur Rehman",
+      "orcid": "0009-0001-0235-1563",
+      "affiliation": "Department of Biology, College of Science, United Arab Emirates University, Al Ain, United Arab Emirates"
+    }
+  ],
+  "description": "<p>RefGauge audits how much a cross-study effect estimate depends on the reference population that defines the contrast, and reports held-out transport separately from reference sensitivity.</p><p>Version 0.3.0 adds a finite-reference-family excess-discrepancy estimand calibrated against direct primary-primary disagreement on the same metric, hierarchical equal-source weighting with leave-one-primary-source diagnostics, and joint source-bootstrap confidence limits that retain shared target and reference dependence. Strict direct-design, independence, covariance, reference-stability and protocol-transport gates decide identifiability before any scalar is emitted; when the quantity is not identified the tool returns a machine-readable abstention state and retains all descriptive diagnostics rather than reporting a score. The v0.2 descriptive reference audit and held-out transport behaviour are preserved unchanged.</p><p>RefGauge does not select a biologically correct reference, and it does not produce a universal fidelity score.</p>",
+  "keywords": [
+    "meta-analysis",
+    "reference sensitivity",
+    "cross-study transport",
+    "prediction intervals",
+    "organoid fidelity",
+    "reproducibility"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "10.5281/zenodo.21796463",
+      "relation": "isSupplementTo",
+      "resource_type": "dataset",
+      "scheme": "doi"
+    }
+  ]
+}

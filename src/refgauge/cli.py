@@ -27,6 +27,23 @@ def _json_ready(frame: pd.DataFrame) -> list[dict]:
     return clean.to_dict(orient="records")
 
 
+def _at_least(minimum: int):
+    def parse(value: str) -> int:
+        parsed = int(value)
+        if parsed < minimum:
+            raise argparse.ArgumentTypeError(f"must be at least {minimum}")
+        return parsed
+
+    return parse
+
+
+def _confidence_alpha(value: str) -> float:
+    parsed = float(value)
+    if not 0 < parsed <= 0.05:
+        raise argparse.ArgumentTypeError("must be greater than 0 and no larger than 0.05")
+    return parsed
+
+
 def run_calibrate(args: argparse.Namespace) -> None:
     from .report import calibration_figure, write_html_report
 
@@ -97,6 +114,86 @@ def run_reference(args: argparse.Namespace) -> None:
     )
 
 
+def run_reference_standardize(args: argparse.Namespace) -> None:
+    from .report import reference_standardization_figure, write_html_report
+    from .standardization import standardize_reference_family
+
+    outdir = args.output
+    outdir.mkdir(parents=True, exist_ok=True)
+    design = _read(args.design) if args.design is not None else None
+    bootstrap = _read(args.bootstrap) if args.bootstrap is not None else None
+    result = standardize_reference_family(
+        _read(args.edges),
+        design=design,
+        bootstrap=bootstrap,
+        delta_ref=args.delta_ref,
+        delta_bio=args.delta_bio,
+        min_primary_sources=args.min_primary_sources,
+        min_target_units=args.min_target_units,
+        min_bootstrap_draws=args.min_bootstrap_draws,
+        alpha=args.alpha,
+    )
+
+    outputs = {
+        "reference_standardized_scores.tsv": result.scores,
+        "anchor_excess.tsv": result.anchor_excess,
+        "reference_baselines.tsv": result.reference_baselines,
+        "reference_gates.tsv": result.gates,
+        "source_deletions.tsv": result.source_deletions,
+    }
+    for filename, frame in outputs.items():
+        frame.to_csv(outdir / filename, sep="\t", index=False)
+
+    status_counts = (
+        result.scores["status"].value_counts(dropna=False).rename_axis("status").reset_index(name="n")
+        if "status" in result.scores
+        else pd.DataFrame([{"status": "UNKNOWN", "n": len(result.scores)}])
+    )
+    gate_column = "gate_id" if "gate_id" in result.gates else "gate"
+    gate_counts = (
+        result.gates.groupby([gate_column, "passed"], dropna=False)
+        .size()
+        .reset_index(name="n")
+        if {gate_column, "passed"}.issubset(result.gates.columns)
+        else pd.DataFrame()
+    )
+    summary = status_counts.copy()
+    summary["standardised_scalar_emitted"] = ~summary["status"].astype(str).str.startswith(
+        "ABSTAIN_"
+    )
+    payload = {
+        "status_counts": _json_ready(status_counts),
+        "gate_counts": _json_ready(gate_counts),
+        "contract": {
+            "design_supplied": args.design is not None,
+            "delta_ref": args.delta_ref,
+            "delta_bio": args.delta_bio,
+            "alpha": args.alpha,
+            "min_primary_sources": args.min_primary_sources,
+            "min_target_units": args.min_target_units,
+            "min_bootstrap_draws": args.min_bootstrap_draws,
+        },
+    }
+    (outdir / "reference_standardization_summary.json").write_text(
+        json.dumps(payload, indent=2) + "\n", encoding="utf-8"
+    )
+    reference_standardization_figure(
+        result.anchor_excess, result.gates, outdir / "reference_standardization_diagnostic.png"
+    )
+    write_html_report(
+        "RefGauge reference-family standardisation",
+        summary,
+        "reference_standardization_diagnostic.png",
+        outdir / "report.html",
+        note=(
+            "A score is emitted only when the declared finite reference family passes "
+            "the expected-cell declaration, direct-crossing, "
+            "independence, joint-uncertainty, and reference-stability gates. Failed gates preserve "
+            "anchor-specific diagnostics and produce a machine-readable abstention."
+        ),
+    )
+
+
 def run_demo(args: argparse.Namespace) -> None:
     inputs = args.output / "inputs"
     effect_path, reference_path = write_demo(inputs, seed=args.seed)
@@ -164,6 +261,45 @@ def build_parser() -> argparse.ArgumentParser:
     ref.add_argument("--contrasts", type=Path, required=True)
     ref.add_argument("--output", type=Path, required=True)
     ref.set_defaults(func=run_reference)
+
+    standardize = sub.add_parser(
+        "reference-standardize",
+        help="Standardise over a finite primary-reference family or abstain",
+    )
+    standardize.add_argument("--edges", type=Path, required=True)
+    standardize.add_argument(
+        "--design",
+        type=Path,
+        default=None,
+        help=(
+            "Expected source-level OP/PP cells; omission preserves point diagnostics "
+            "but forces a declared-design abstention"
+        ),
+    )
+    standardize.add_argument(
+        "--bootstrap",
+        type=Path,
+        default=None,
+        help="Joint source-level bootstrap edge table; omission forces an uncertainty abstention",
+    )
+    standardize.add_argument("--output", type=Path, required=True)
+    standardize.add_argument(
+        "--delta-ref",
+        type=float,
+        default=None,
+        help="Prespecified maximum tolerable residual reference dependence",
+    )
+    standardize.add_argument(
+        "--delta-bio",
+        type=float,
+        default=None,
+        help="Optional prespecified biological excess-discrepancy margin",
+    )
+    standardize.add_argument("--alpha", type=_confidence_alpha, default=0.05)
+    standardize.add_argument("--min-primary-sources", type=_at_least(6), default=6)
+    standardize.add_argument("--min-target-units", type=_at_least(3), default=3)
+    standardize.add_argument("--min-bootstrap-draws", type=_at_least(5_000), default=5_000)
+    standardize.set_defaults(func=run_reference_standardize)
 
     demo = sub.add_parser("demo", help="Generate synthetic data and a complete example report")
     demo.add_argument("--output", type=Path, required=True)

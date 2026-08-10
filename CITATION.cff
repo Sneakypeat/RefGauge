@@ -2,19 +2,17 @@ cff-version: 1.2.0
 message: "If you use RefGauge, please cite this software release."
 title: "RefGauge: reference-aware transport auditing for cross-study omics"
 type: software
-version: 0.2.0
-date-released: 2026-08-03
+version: 0.3.0
+date-released: 2026-08-10
 authors:
   - family-names: Syed
-    given-names: Sabih Ur Rehman
+    given-names: Sabih ur Rehman
+    orcid: "https://orcid.org/0009-0001-0235-1563"
 doi: "10.5281/zenodo.21794555"
 identifiers:
   - type: doi
     value: "10.5281/zenodo.21794555"
     description: "Concept DOI, resolves to the latest version"
-  - type: doi
-    value: "10.5281/zenodo.21794556"
-    description: "Version DOI for v0.2.0"
 repository-code: "https://github.com/Sneakypeat/RefGauge"
 license: BSD-3-Clause
 keywords:
